@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 
+
 class Personne extends Authenticatable
 {
     /** @use HasFactory<\Database\Factories\UserFactory> */
@@ -23,6 +24,8 @@ class Personne extends Authenticatable
         'password',
         'reputation_score'
     ];
+
+   
 
     /**
      * The attributes that should be hidden for serialization.
