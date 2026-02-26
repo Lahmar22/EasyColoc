@@ -6,26 +6,22 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
-    /**
-     * Run the migrations.
-     */
+    
     public function up(): void
     {
-        Schema::create('colocations', function (Blueprint $table) {
+        Schema::create('invitations', function (Blueprint $table) {
             $table->id();
-            $table->string('name');
-            $table->boolean('status_colocation')->default(true); 
-            $table->integer('token')->unique();
+            $table->string('email');
+            $table->string('token');
+            $table->foreignId('colocation_id')->constrained('colocations')->onDelete('cascade');
             $table->foreignId('utilisateur_id')->constrained('personnes')->onDelete('cascade');
             $table->timestamps();
         });
     }
 
-    /**
-     * Reverse the migrations.
-     */
+    
     public function down(): void
     {
-        Schema::dropIfExists('colocations');
+        Schema::dropIfExists('invitations');
     }
 };

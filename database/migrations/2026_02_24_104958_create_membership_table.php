@@ -11,13 +11,13 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('membership', function (Blueprint $table) {
+        Schema::create('memberships', function (Blueprint $table) {
             $table->id();
             $table->string('role')->default('member');
             $table->date('joined_at');
-            $table->date('left_at');
+            $table->date('left_at')->nullable();
             $table->boolean('is_active')->default(true);
-            $table->foreignId('utilisateur_id')->constrained('utilisateurs')->onDelete('cascade');
+            $table->foreignId('utilisateur_id')->constrained('personnes')->onDelete('cascade');
             $table->foreignId('colocation_id')->constrained('colocations')->onDelete('cascade');
             $table->timestamps();
         });
@@ -28,6 +28,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('membership');
+        Schema::dropIfExists('memberships');
     }
 };
