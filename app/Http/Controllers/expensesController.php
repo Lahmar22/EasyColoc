@@ -12,9 +12,11 @@ class expensesController extends Controller
 {
     public function index(){
         $categories = Categorie::all();
+        $iduser = Membership::where('utilisateur_id', auth()->id())->first();
         $expenses = Expense::join('personnes', 'expenses.utilisateur_id', '=', 'personnes.id')
                             ->join('categories', 'expenses.category_id', '=', 'categories.id')
                             ->select('expenses.*', 'personnes.name as user_name', 'categories.name as category_name')
+                            ->where('expenses.colocation_id', $iduser->colocation_id)
                             ->get();
 
         return view('user.expenses', compact('categories', 'expenses'));
