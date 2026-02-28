@@ -152,8 +152,9 @@
         </div>
         <nav class="flex-1 px-4 flex flex-col gap-1">
             
-            <a href="dashboard.html" class="nav-item active"><span>📊</span> Dashboard</a>
-           
+            <a href="{{ route('user.dashboard') }}" class="nav-item active"><span>📊</span> Dashboard</a>
+            <a href="{{ route('user.expenses') }}" class="nav-item"><span>💸</span> Dépenses</a>
+            <a href="{{ route('user.payments') }}" class="nav-item"><span>✅</span> Paiements</a>
            
             <a href="profile.html" class="nav-item"><span>👤</span> Mon Profil</a>
         </nav>
@@ -177,13 +178,25 @@
                 <p class="text-slate-500 text-sm mt-1">Gérez vos membres, invitations et paramètres</p>
             </div>
             <div class="flex gap-3">
-                <button class="btn-gradient" onclick="document.getElementById('inviteModal').style.display='flex'">
-                    📧 Inviter un membre
-                </button>
-                <button onclick="document.getElementById('createModal').style.display='flex'"
-                    class="px-4 py-2.5 rounded-xl border-2 border-slate-300 text-slate-700 font-semibold text-sm hover:border-sky-400 transition">
-                    + Créer une coloc
-                </button>
+    
+            <!-- Invite -->
+            <button class="btn-gradient"
+                onclick="document.getElementById('inviteModal').style.display='flex'">
+                📧 Inviter un membre
+            </button>
+
+            <!-- Create -->
+            <button onclick="document.getElementById('createModal').style.display='flex'"
+                class="px-4 py-2.5 rounded-xl border-2 border-slate-300 text-slate-700 font-semibold text-sm hover:border-sky-400 transition">
+                + Créer une coloc
+            </button>
+
+            <!-- Join by Token -->
+            <button onclick="document.getElementById('joinModal').style.display='flex'"
+                class="px-4 py-2.5 rounded-xl bg-emerald-500 text-white font-semibold text-sm hover:bg-emerald-600 transition shadow-md">
+                🔑 Rejoindre par token
+            </button>
+
             </div>
         </div>
 
@@ -241,8 +254,12 @@
             <!-- MEMBERS LIST -->
             <div class="col-span-2 glass-white rounded-2xl shadow-xl p-6">
                 <h3 class="font-bold text-slate-800 text-lg mb-5">Membres actifs</h3>
-                @foreach ($members as $member)
-                    <div class="flex flex-col gap-4">
+                <div class="flex flex-col gap-4">
+                    @if(!$exists)
+                        <p class="text-slate-500 text-center">Vous n'êtes pas membre de cette colocation</p>
+                    @else
+                        @foreach ($members as $member)
+                    
                         <div class="flex items-center gap-4 p-4 rounded-xl bg-slate-50 hover:bg-slate-100 transition">
                             <div
                                 class="w-12 h-12 rounded-full bg-gradient-to-br from-sky-300 to-violet-500 flex items-center justify-center text-white font-bold">
@@ -260,8 +277,10 @@
                             @endif
                         </div>
                 
-                    </div>
-                @endforeach
+                        @endforeach
+                    @endif
+                       
+                </div>
 
                 <!-- Leave coloc -->
                 <div class="mt-6 p-4 rounded-xl border-2 border-dashed border-red-200 bg-red-50">
@@ -421,6 +440,42 @@
             </div>
         </div>
     </div>
+
+    <!-- Join Colocation Modal -->
+<div id="joinModal"
+    class="fixed inset-0 bg-black/40 backdrop-blur-sm hidden items-center justify-center z-50">
+
+    <div class="bg-white rounded-2xl shadow-xl w-full max-w-md p-6 relative">
+
+        <!-- Close -->
+        <button onclick="document.getElementById('joinModal').style.display='none'"
+            class="absolute top-3 right-3 text-slate-400 hover:text-red-500">
+            ✕
+        </button>
+
+        <h2 class="text-xl font-bold text-slate-800 mb-4">
+            🔑 Rejoindre une colocation
+        </h2>
+
+        <form method="POST" action="{{ route('colocation.join') }}" class="space-y-4">
+            @csrf
+            <div>
+                <label class="text-sm font-medium text-slate-600 block mb-1">
+                    Token de la colocation
+                </label>
+                <input type="number" name="token" required
+                    class="w-full px-4 py-2 rounded-xl border border-slate-300 focus:ring-2 focus:ring-emerald-400 focus:outline-none"
+                    placeholder="Ex: 123456789">
+            </div>
+
+            <button type="submit"
+                class="w-full bg-emerald-500 text-white py-2.5 rounded-xl font-semibold hover:bg-emerald-600 transition">
+                Rejoindre
+            </button>
+        </form>
+
+    </div>
+</div>
 
 </body>
 <script>
