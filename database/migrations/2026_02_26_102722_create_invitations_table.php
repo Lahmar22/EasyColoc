@@ -14,7 +14,6 @@ return new class extends Migration
             $table->string('email');
             $table->string('token');
             $table->foreignId('colocation_id')->constrained('colocations')->onDelete('cascade');
-            $table->foreignId('utilisateur_id')->constrained('personnes')->onDelete('cascade');
             $table->timestamps();
         });
     }
