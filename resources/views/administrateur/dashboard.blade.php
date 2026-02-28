@@ -108,7 +108,7 @@
             style="background:rgba(255,255,255,0.07);border:1px solid rgba(255,255,255,0.12);">
             <div
                 class="w-10 h-10 rounded-full bg-gradient-to-br from-sky-300 to-violet-500 flex items-center justify-center text-white font-bold text-sm">
-                MD</div>
+                {{ Str::upper(substr(Auth::user()->name,0,2)) }}</div>
             <div>
                 <p class="text-white font-semibold text-sm">{{ Auth::user()->name }}</p>
                 <p class="text-sky-300 text-xs">Admin global</p>
@@ -116,8 +116,6 @@
         </div>
         <nav class="flex-1 px-4 flex flex-col gap-1">
             <a href="#" class="nav-item active"><span>📊</span> Dashboard</a>
-            
-            <a href="profile.html" class="nav-item"><span>👤</span> Mon Profil</a>
         </nav>
         <div class="h-px bg-white/10 my-3"></div>
         <div class="p-4"><a href="{{ route('logout') }}" class="nav-item justify-center"
@@ -140,19 +138,19 @@
         <div class="grid grid-cols-4 gap-4 mb-8">
             <div class="glass-white rounded-2xl shadow p-5">
                 <p class="text-slate-400 text-xs mb-1">Utilisateurs totaux</p>
-                <p class="text-3xl font-extrabold text-slate-800">12</p>
+                <p class="text-3xl font-extrabold text-slate-800">{{ $totalUsers ?? 0 }}</p>
             </div>
             <div class="glass-white rounded-2xl shadow p-5">
                 <p class="text-slate-400 text-xs mb-1">Actifs</p>
-                <p class="text-3xl font-extrabold text-emerald-500">9</p>
+                <p class="text-3xl font-extrabold text-emerald-500">{{ $activeUsers ?? 0 }}</p>
             </div>
             <div class="glass-white rounded-2xl shadow p-5">
                 <p class="text-slate-400 text-xs mb-1">Bannis</p>
-                <p class="text-3xl font-extrabold text-red-500">2</p>
+                <p class="text-3xl font-extrabold text-red-500">{{ $bannedUsers ?? 0 }}</p>
             </div>
             <div class="glass-white rounded-2xl shadow p-5">
                 <p class="text-slate-400 text-xs mb-1">Colocations actives</p>
-                <p class="text-3xl font-extrabold text-sky-600">4</p>
+                <p class="text-3xl font-extrabold text-sky-600">{{ $activeColocs ?? 0 }}</p>
             </div>
         </div>
 
@@ -172,8 +170,10 @@
         <div id="panel-users" class="glass-white rounded-2xl shadow-xl overflow-hidden">
             <div class="p-5 border-b border-slate-100 flex items-center justify-between">
                 <h2 class="font-bold text-slate-800">Gestion des utilisateurs</h2>
-                <input class="px-3 py-2 rounded-xl border border-slate-200 text-sm outline-none focus:border-sky-400"
-                    placeholder="🔍 Rechercher..." />
+                <form method="GET" action="{{ route('administrateur.dashboard') }}">
+                    <input name="q" value="{{ request('q') }}" class="px-3 py-2 rounded-xl border border-slate-200 text-sm outline-none focus:border-sky-400"
+                        placeholder="🔍 Rechercher..." />
+                </form>
             </div>
             <table class="w-full text-sm">
                 <thead>
@@ -187,81 +187,49 @@
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-slate-100">
-                    <tr class="hover:bg-slate-50 transition">
-                        <td class="px-5 py-4">
-                            <div class="flex items-center gap-2">
-                                <div
-                                    class="w-8 h-8 rounded-full bg-gradient-to-br from-sky-300 to-violet-500 flex items-center justify-center text-white font-bold text-xs">
-                                    MD</div>
-                                <span class="font-semibold text-slate-800">Marie Dupont</span>
-                            </div>
-                        </td>
-                        <td class="px-5 py-4 text-slate-500">marie@email.com</td>
-                        <td class="px-5 py-4"><span class="badge bg-amber-100 text-amber-700">👑 Admin</span></td>
-                        <td class="px-5 py-4 text-amber-500 font-bold">+4 ⭐</td>
-                        <td class="px-5 py-4"><span class="badge bg-emerald-100 text-emerald-700">Actif</span></td>
-                        <td class="px-5 py-4 text-center text-slate-400 text-xs">—</td>
-                    </tr>
-                    <tr class="hover:bg-slate-50 transition">
-                        <td class="px-5 py-4">
-                            <div class="flex items-center gap-2">
-                                <div
-                                    class="w-8 h-8 rounded-full bg-indigo-200 flex items-center justify-center text-indigo-700 font-bold text-xs">
-                                    TM</div>
-                                <span class="font-semibold text-slate-800">Thomas Martin</span>
-                            </div>
-                        </td>
-                        <td class="px-5 py-4 text-slate-500">thomas@email.com</td>
-                        <td class="px-5 py-4"><span class="badge bg-slate-100 text-slate-600">Membre</span></td>
-                        <td class="px-5 py-4 text-amber-500 font-bold">+3 ⭐</td>
-                        <td class="px-5 py-4"><span class="badge bg-emerald-100 text-emerald-700">Actif</span></td>
-                        <td class="px-5 py-4 text-center"><button class="btn-ban">🚫 Bannir</button></td>
-                    </tr>
-                    <tr class="hover:bg-slate-50 transition">
-                        <td class="px-5 py-4">
-                            <div class="flex items-center gap-2">
-                                <div
-                                    class="w-8 h-8 rounded-full bg-pink-200 flex items-center justify-center text-pink-700 font-bold text-xs">
-                                    LB</div>
-                                <span class="font-semibold text-slate-800">Lucie Bernard</span>
-                            </div>
-                        </td>
-                        <td class="px-5 py-4 text-slate-500">lucie@email.com</td>
-                        <td class="px-5 py-4"><span class="badge bg-slate-100 text-slate-600">Membre</span></td>
-                        <td class="px-5 py-4 text-amber-500 font-bold">+2 ⭐</td>
-                        <td class="px-5 py-4"><span class="badge bg-emerald-100 text-emerald-700">Actif</span></td>
-                        <td class="px-5 py-4 text-center"><button class="btn-ban">🚫 Bannir</button></td>
-                    </tr>
-                    <tr class="hover:bg-slate-50 transition opacity-60">
-                        <td class="px-5 py-4">
-                            <div class="flex items-center gap-2">
-                                <div
-                                    class="w-8 h-8 rounded-full bg-slate-300 flex items-center justify-center text-slate-700 font-bold text-xs">
-                                    JD</div>
-                                <span class="font-semibold text-slate-500 line-through">Jean Durand</span>
-                            </div>
-                        </td>
-                        <td class="px-5 py-4 text-slate-400">jean@email.com</td>
-                        <td class="px-5 py-4"><span class="badge bg-slate-100 text-slate-500">Membre</span></td>
-                        <td class="px-5 py-4 text-red-400 font-bold">-1 ⭐</td>
-                        <td class="px-5 py-4"><span class="badge bg-red-100 text-red-600">🚫 Banni</span></td>
-                        <td class="px-5 py-4 text-center"><button class="btn-unban">✅ Débannir</button></td>
-                    </tr>
-                    <tr class="hover:bg-slate-50 transition opacity-60">
-                        <td class="px-5 py-4">
-                            <div class="flex items-center gap-2">
-                                <div
-                                    class="w-8 h-8 rounded-full bg-slate-300 flex items-center justify-center text-slate-700 font-bold text-xs">
-                                    AP</div>
-                                <span class="font-semibold text-slate-500 line-through">Alice Petit</span>
-                            </div>
-                        </td>
-                        <td class="px-5 py-4 text-slate-400">alice@email.com</td>
-                        <td class="px-5 py-4"><span class="badge bg-slate-100 text-slate-500">Membre</span></td>
-                        <td class="px-5 py-4 text-red-400 font-bold">-2 ⭐</td>
-                        <td class="px-5 py-4"><span class="badge bg-red-100 text-red-600">🚫 Banni</span></td>
-                        <td class="px-5 py-4 text-center"><button class="btn-unban">✅ Débannir</button></td>
-                    </tr>
+                    @forelse($users ?? [] as $u)
+                        <tr class="hover:bg-slate-50 transition @if($u->is_banned) opacity-60 @endif">
+                            <td class="px-5 py-4">
+                                <div class="flex items-center gap-2">
+                                    <div class="w-8 h-8 rounded-full bg-slate-300 flex items-center justify-center text-slate-700 font-bold text-xs">{{ strtoupper(substr($u->name,0,2)) }}</div>
+                                    <span class="font-semibold @if($u->is_banned) text-slate-500 line-through @else text-slate-800 @endif">{{ $u->name }}</span>
+                                </div>
+                            </td>
+                            <td class="px-5 py-4 text-slate-500">{{ $u->email }}</td>
+                            <td class="px-5 py-4">
+                                @if($u->admin_id ?? false)
+                                    <span class="badge bg-amber-100 text-amber-700">👑 Admin</span>
+                                @else
+                                    <span class="badge bg-slate-100 text-slate-600">Membre</span>
+                                @endif
+                            </td>
+                            <td class="px-5 py-4 text-amber-500 font-bold">{{ $u->reputation_score ?? 0 }} ⭐</td>
+                            <td class="px-5 py-4">
+                                @if($u->is_banned)
+                                    <span class="badge bg-red-100 text-red-600">🚫 Banni</span>
+                                @else
+                                    <span class="badge bg-emerald-100 text-emerald-700">Actif</span>
+                                @endif
+                            </td>
+                            <td class="px-5 py-4 text-center">
+                                @if($u->is_banned)
+                                    <form method="POST" action="{{ route('administrateur.unban', $u->id) }}" style="display:inline;">
+                                        @csrf
+                                        <button class="btn-unban">✅ Débannir</button>
+                                    </form>
+                                @elseif(!($u->admin_id ?? false) && $u->id !== Auth::id())
+                                    <form method="POST" action="{{ route('administrateur.ban', $u->id) }}" style="display:inline;">
+                                        @csrf
+                                        <button class="btn-ban">🚫 Bannir</button>
+                                    </form>
+                                @else
+                                    <span class="text-slate-400 text-xs">—</span>
+                                @endif
+                            </td>
+                        </tr>
+                    @empty
+                        <tr><td colspan="6" class="px-5 py-8 text-center text-slate-400">Aucun utilisateur trouvé</td></tr>
+                    @endforelse
                 </tbody>
             </table>
             <!-- Blocked user notice -->
@@ -275,26 +243,21 @@
         <div id="panel-banned" class="hidden glass-white rounded-2xl shadow-xl p-6">
             <h2 class="font-bold text-slate-800 mb-4">🚫 Utilisateurs bannis</h2>
             <div class="flex flex-col gap-3">
-                <div class="flex items-center gap-4 p-4 bg-red-50 rounded-xl border border-red-100">
-                    <div
-                        class="w-10 h-10 rounded-full bg-slate-300 flex items-center justify-center text-slate-600 font-bold text-sm">
-                        JD</div>
-                    <div class="flex-1">
-                        <p class="font-semibold text-slate-700 line-through">Jean Durand</p>
-                        <p class="text-slate-400 text-xs">Banni le 10 janv. 2025 · jean@email.com</p>
+                @forelse(($users ?? [])->where('is_banned', 1) as $b)
+                    <div class="flex items-center gap-4 p-4 bg-red-50 rounded-xl border border-red-100">
+                        <div class="w-10 h-10 rounded-full bg-slate-300 flex items-center justify-center text-slate-600 font-bold text-sm">{{ strtoupper(substr($b->name,0,2)) }}</div>
+                        <div class="flex-1">
+                            <p class="font-semibold text-slate-700 line-through">{{ $b->name }}</p>
+                            <p class="text-slate-400 text-xs">Banni · {{ $b->email }}</p>
+                        </div>
+                        <form method="POST" action="{{ route('administrateur.unban', $b->id) }}" style="display:inline;">
+                            @csrf
+                            <button class="btn-unban">✅ Lever le ban</button>
+                        </form>
                     </div>
-                    <button class="btn-unban">✅ Lever le ban</button>
-                </div>
-                <div class="flex items-center gap-4 p-4 bg-red-50 rounded-xl border border-red-100">
-                    <div
-                        class="w-10 h-10 rounded-full bg-slate-300 flex items-center justify-center text-slate-600 font-bold text-sm">
-                        AP</div>
-                    <div class="flex-1">
-                        <p class="font-semibold text-slate-700 line-through">Alice Petit</p>
-                        <p class="text-slate-400 text-xs">Bannie le 5 janv. 2025 · alice@email.com</p>
-                    </div>
-                    <button class="btn-unban">✅ Lever le ban</button>
-                </div>
+                @empty
+                    <p class="text-slate-400 text-center py-8">Aucun utilisateur banni</p>
+                @endforelse
             </div>
         </div>
 
@@ -311,27 +274,17 @@
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-slate-100">
-                    <tr class="hover:bg-slate-50 transition">
-                        <td class="px-5 py-4 font-semibold text-slate-800">🏙️ Appart Paris 11e</td>
-                        <td class="px-5 py-4 text-slate-600">Marie Dupont</td>
-                        <td class="px-5 py-4 text-slate-600">3</td>
-                        <td class="px-5 py-4"><span class="badge bg-emerald-100 text-emerald-700">Active</span></td>
-                        <td class="px-5 py-4 text-slate-400">1 janv. 2025</td>
-                    </tr>
-                    <tr class="hover:bg-slate-50 transition">
-                        <td class="px-5 py-4 font-semibold text-slate-800">🏠 Coloc Oberkampf</td>
-                        <td class="px-5 py-4 text-slate-600">Thomas Martin</td>
-                        <td class="px-5 py-4 text-slate-600">2</td>
-                        <td class="px-5 py-4"><span class="badge bg-emerald-100 text-emerald-700">Active</span></td>
-                        <td class="px-5 py-4 text-slate-400">5 nov. 2024</td>
-                    </tr>
-                    <tr class="hover:bg-slate-50 transition opacity-60">
-                        <td class="px-5 py-4 font-semibold text-slate-500 line-through">Studio Bastille</td>
-                        <td class="px-5 py-4 text-slate-400">Marie Dupont</td>
-                        <td class="px-5 py-4 text-slate-400">2</td>
-                        <td class="px-5 py-4"><span class="badge bg-slate-100 text-slate-500">Cancelled</span></td>
-                        <td class="px-5 py-4 text-slate-400">3 mars 2023</td>
-                    </tr>
+                    @forelse($colocations ?? [] as $c)
+                        <tr class="hover:bg-slate-50 transition @if(!$c->status_colocation) opacity-60 @endif">
+                            <td class="px-5 py-4 font-semibold @if(!$c->status_colocation) text-slate-500 line-through @else text-slate-800 @endif">{{ $c->name }}</td>
+                            <td class="px-5 py-4 text-slate-600">{{ $c->owner_name ?? 'Unknown' }}</td>
+                            <td class="px-5 py-4 text-slate-600">{{ $c->members_count ?? 0 }}</td>
+                            <td class="px-5 py-4">@if($c->status_colocation)<span class="badge bg-emerald-100 text-emerald-700">Active</span>@else<span class="badge bg-slate-100 text-slate-500">Cancelled</span>@endif</td>
+                            <td class="px-5 py-4 text-slate-400">{{ $c->created_at ? \Carbon\Carbon::parse($c->created_at)->translatedFormat('j M Y') : '' }}</td>
+                        </tr>
+                    @empty
+                        <tr><td colspan="5" class="px-5 py-8 text-center text-slate-400">Aucune colocation</td></tr>
+                    @endforelse
                 </tbody>
             </table>
         </div>

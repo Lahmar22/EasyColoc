@@ -158,7 +158,7 @@
             <a href="{{ route('user.expenses') }}" class="nav-item active"><span>💸</span> Dépenses</a>
             <a href="{{ route('user.payments') }}" class="nav-item"><span>✅</span> Paiements</a>
             
-            <a href="profile.html" class="nav-item"><span>👤</span> Mon Profil</a>
+            <a href="{{ route('user.profile') }}" class="nav-item"><span>👤</span> Mon Profil</a>
             
         </nav>
         <div class="p-4"><a href="{{ route('logout') }}" class="nav-item justify-center"

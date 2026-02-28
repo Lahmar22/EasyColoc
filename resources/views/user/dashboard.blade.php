@@ -156,7 +156,7 @@
             <a href="{{ route('user.expenses') }}" class="nav-item"><span>💸</span> Dépenses</a>
             <a href="{{ route('user.payments') }}" class="nav-item"><span>✅</span> Paiements</a>
            
-            <a href="profile.html" class="nav-item"><span>👤</span> Mon Profil</a>
+            <a href="{{ route('user.profile') }}" class="nav-item"><span>👤</span> Mon Profil</a>
         </nav>
          <div class="h-px bg-white/10 my-3"></div>
         <div class="p-4">
@@ -180,10 +180,12 @@
             <div class="flex gap-3">
     
             <!-- Invite -->
+            @if($roleMembership)
             <button class="btn-gradient"
                 onclick="document.getElementById('inviteModal').style.display='flex'">
                 📧 Inviter un membre
             </button>
+            @endif
 
             <!-- Create -->
             <button onclick="document.getElementById('createModal').style.display='flex'"
@@ -257,6 +259,8 @@
                 <div class="flex flex-col gap-4">
                     @if(!$exists)
                         <p class="text-slate-500 text-center">Vous n'êtes pas membre de cette colocation</p>
+                    @elseif(!$activeMembership)
+                        <p class="text-slate-500 text-center">Vous n'êtes pas membre actif de cette colocation</p>
                     @else
                         @foreach ($members as $member)
                     
@@ -291,12 +295,13 @@
                             onclick="document.getElementById('leaveModal').style.display='flex'">
                             🚪 Quitter la colocation
                         </button>
-
+                        @if($roleMembership)
                             <button
                                 class="px-4 py-2 rounded-xl bg-white border border-red-300 text-red-600 text-sm font-semibold hover:bg-red-50 transition"
                                 onclick="document.getElementById('cancelModal').style.display='flex'">
                                 ❌ Annuler la colocation
                             </button>
+                        @endif
 
                     </div>
                 </div>
@@ -395,7 +400,7 @@
                     onclick="document.getElementById('removeModal').style.display='none'">Annuler</button>
                 <button
                     class="px-4 py-2.5 rounded-xl bg-red-500 text-white font-semibold text-sm hover:bg-red-600 transition">Confirmer
-                    le retrait</button>
+                    le retrait</button> 
             </div>
         </div>
     </div>
@@ -409,14 +414,16 @@
                 <p class="text-red-700 text-sm font-medium">Si vous avez des dettes, votre réputation baissera de
                     <strong>-1</strong>. Sans dette : <strong>+1</strong>.</p>
             </div>
-            <p class="text-slate-600 text-sm mb-6">Votre départ sera enregistré (<code
-                    class="bg-slate-100 px-1 rounded">left_at</code> = aujourd'hui).</p>
+            
             <div class="flex gap-3 justify-end">
                 <button class="px-4 py-2.5 rounded-xl border border-slate-200 text-slate-600 font-medium text-sm"
                     onclick="document.getElementById('leaveModal').style.display='none'">Annuler</button>
-                <button
+                <form action="{{ route('colocation.quitter') }}" method="post">
+                    @csrf
+                    <button type="submit"
                     class="px-4 py-2.5 rounded-xl bg-red-500 text-white font-semibold text-sm hover:bg-red-600 transition">Confirmer
                     le départ</button>
+                </form>
             </div>
         </div>
     </div>
