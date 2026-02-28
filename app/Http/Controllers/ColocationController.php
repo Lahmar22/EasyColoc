@@ -17,17 +17,21 @@ class ColocationController extends Controller
         $invitations = Invitation::where('status', 'pending')->get();
         $colocations = Colocation::join('memberships', 'memberships.colocation_id', '=', 'colocations.id')
         ->where('memberships.utilisateur_id', auth()->id())
+        ->where('memberships.is_active', true)
         ->select('colocations.*')
         ->get();
 
         $members = Membership::join('personnes' , 'memberships.utilisateur_id' , '=', 'personnes.id')
         ->join('colocations' , 'memberships.colocation_id' , '=', 'colocations.id')
         ->select('personnes.name as user_name', 'personnes.email as user_email', 'personnes.reputation_score', 'memberships.*')
+        ->where('memberships.is_active', true)
         ->get();
 
         $exists = Membership::where('utilisateur_id', auth()->id())->exists();
+        $activeMembership = Membership::where('utilisateur_id', auth()->id())->where('is_active', true)->exists();
+        $roleMembership = Membership::where('utilisateur_id', auth()->id())->where('role', 'owner')->exists();
 
-        return view('user.dashboard', compact('colocations', 'members', 'invitations', 'exists'));
+        return view('user.dashboard', compact('colocations', 'members', 'invitations', 'exists', 'activeMembership', 'roleMembership'));
     }
 
     public function create(Request $request){
@@ -46,7 +50,7 @@ class ColocationController extends Controller
                 'created_at' => now()
             ]);
             Membership::create([
-                'role' => 'admin',
+                'role' => 'owner',
                 'joined_at' => now(),
                 'is_active' => true,
                 'utilisateur_id' => auth()->id(),
@@ -83,6 +87,20 @@ class ColocationController extends Controller
         Personne::where('id', auth()->id())->update([
             'reputation_score' => 50,
         ]);
+
+        return redirect()->route('user.dashboard');
+    }
+
+    public function quitter(Request $request){
+        $membership = Membership::where('utilisateur_id', auth()->id())->first();
+
+        if ($membership) {
+            $membership->is_active = false;
+            $membership->left_at = now();
+            $membership->save();
+
+            Personne::where('id', auth()->id())->decrement('reputation_score', 10);
+        }
 
         return redirect()->route('user.dashboard');
     }
