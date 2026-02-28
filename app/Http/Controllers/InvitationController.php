@@ -8,6 +8,7 @@ use App\Mail\TestMail;
 use App\Models\Colocation;
 use App\Models\Invitation;
 use App\Models\Personne;
+use App\Models\Membership;
 
 class InvitationController extends Controller
 {
@@ -17,10 +18,10 @@ class InvitationController extends Controller
             'email' => 'required|email'
         ]);
 
-        $user = auth()->id();
+        
         $status = 'pending';
 
-        $coloc = Colocation::where('utilisateur_id', $user)->first();
+        $coloc = Colocation::where('utilisateur_id', auth()->id())->first();
 
         $token = bin2hex(random_bytes(16));
         $link = url('/accept-invitation?token=' . $token);
@@ -31,7 +32,6 @@ class InvitationController extends Controller
             'email' => $input['email'],
             'token' => $token,
             'colocation_id' => $coloc->id,
-            'utilisateur_id' => $user,
             'status' => $status
         ]);
 
@@ -77,7 +77,19 @@ class InvitationController extends Controller
         $invitation->status = 'accepted';
         $invitation->save();
 
-        return view('invitation.success');
+        Membership::create([
+            'utilisateur_id' => auth()->id(),
+            'colocation_id' => $invitation->colocation_id,
+            'role' => 'member',
+            'joined_at' => now(),
+            'is_active' => true
+        ]);
+
+        Personne::where('id', auth()->id())->update([
+            'reputation_score' => 100,
+        ]);
+
+        return redirect()->route('user.dashboard')->with('success', 'Invitation acceptée avec succès !');
     }
 
     public function refuse(Request $request)
@@ -97,6 +109,6 @@ class InvitationController extends Controller
         $invitation->status = 'refused';
         $invitation->save();
 
-        return view('invitation.refused');
+        return redirect()->route('user.dashboard')->with('success', 'Invitation refusée avec succès !');
     }
 }
