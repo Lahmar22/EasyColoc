@@ -38,6 +38,8 @@ Route::middleware('auth')->group(function () {
     Route::post('/user/profile', [ProfileController::class, 'update'])->name('user.profile.update');
     Route::post('/user/profile/password', [ProfileController::class, 'updatePassword'])->name('user.profile.password');
     Route::post('/colocation/quitter', [ColocationController::class, 'quitter'])->name('colocation.quitter');
+    Route::post('/colocation/cancel', [ColocationController::class, 'cancel'])->name('colocation.cancel');
+    Route::delete('/membership/{membership}', [ColocationController::class, 'destroy'])->name('membership.remove');
     
 });
 
