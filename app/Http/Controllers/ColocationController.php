@@ -8,6 +8,7 @@ use App\Models\Membership;
 use App\Models\Personne;
 use App\Models\Utilisateur;
 use App\Models\Invitation;
+use App\Models\Payment;
 use Illuminate\Support\Facades\Auth;
 
 class ColocationController extends Controller
@@ -20,6 +21,7 @@ class ColocationController extends Controller
         ->where('memberships.is_active', true)
         ->select('colocations.*')
         ->get();
+        $countColocation = $colocations->count();
 
         $members = Membership::join('personnes' , 'memberships.utilisateur_id' , '=', 'personnes.id')
         ->join('colocations' , 'memberships.colocation_id' , '=', 'colocations.id')
@@ -31,7 +33,8 @@ class ColocationController extends Controller
         $activeMembership = Membership::where('utilisateur_id', auth()->id())->where('is_active', true)->exists();
         $roleMembership = Membership::where('utilisateur_id', auth()->id())->where('role', 'owner')->exists();
 
-        return view('user.dashboard', compact('colocations', 'members', 'invitations', 'exists', 'activeMembership', 'roleMembership'));
+
+        return view('user.dashboard', compact('colocations', 'members', 'invitations', 'exists', 'activeMembership', 'roleMembership', 'countColocation'));
     }
 
     public function create(Request $request){
@@ -66,7 +69,7 @@ class ColocationController extends Controller
             ]);
         }
 
-        return redirect()->route('user.dashboard');
+        return redirect()->route('user.dashboard')->with('message', 'Colocation créée avec succès.');
     }
 
     public function join(Request $request){
@@ -88,7 +91,7 @@ class ColocationController extends Controller
             'reputation_score' => 50,
         ]);
 
-        return redirect()->route('user.dashboard');
+        return redirect()->route('user.dashboard')->with('message', 'Vous avez rejoint la colocation.');
     }
 
     public function quitter(Request $request){
@@ -102,6 +105,41 @@ class ColocationController extends Controller
             Personne::where('id', auth()->id())->decrement('reputation_score', 10);
         }
 
-        return redirect()->route('user.dashboard');
+        return redirect()->route('user.dashboard')->with('message', 'Vous avez quitté la colocation.');
+    }
+
+    public function cancel(Request $request){
+        $membership = Membership::where('utilisateur_id', auth()->id())->where('role', 'owner')->first();
+        $payments = Payment::where('colocation_id', $membership->colocation_id)->get();
+        if ($membership) {
+            if ($payments->contains(function ($payment) {
+                return $payment->status == false;
+            })) {
+                return redirect()->route('user.dashboard')->with('error', 'Impossible d\'annuler la colocation tant que des paiements sont en cours.');
+            }
+            Colocation::where('id', $membership->colocation_id)->delete();
+            Membership::where('colocation_id', $membership->colocation_id)->delete();
+            Payment::where('colocation_id', $membership->colocation_id)->delete();
+
+            Personne::where('id', auth()->id())->decrement('reputation_score', 20);
+        }
+
+        return redirect()->route('user.dashboard')->with('message', 'Colocation annulée.');
+    }
+
+    public function destroy(Membership $membership)
+    {
+        if ($membership->role == 'member' && $membership->is_active) {
+            $membership->is_active = false;
+            $membership->left_at = now(); 
+            $membership->save();
+
+            Personne::where('id', $membership->utilisateur_id)->decrement('reputation_score', 10);
+
+            return redirect()->route('user.dashboard')->with('message', 'Membre retiré de la colocation.');
+        }
+
+
+        return redirect()->route('user.dashboard')->with('error', 'Vous n\'avez pas la permission de retirer ce membre.');
     }
 }
