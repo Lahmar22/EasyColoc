@@ -53,8 +53,8 @@ class expensesController extends Controller
             'category_id' => $input['category_id']
         ]);
 
-        $countUsers = Membership::where('colocation_id', $coloc->id)->count();
-        $members = Membership::where('colocation_id', $coloc->id)->get();
+        $countUsers = Membership::where('colocation_id', $coloc->id)->where('status', true)->count();
+        $members = Membership::where('colocation_id', $coloc->id)->where('status', true)->get();
         $amountPerUser = $input['amount'] / $countUsers;
 
         
