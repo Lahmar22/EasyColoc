@@ -26,6 +26,7 @@ class ColocationController extends Controller
         $members = Membership::join('personnes' , 'memberships.utilisateur_id' , '=', 'personnes.id')
         ->join('colocations' , 'memberships.colocation_id' , '=', 'colocations.id')
         ->select('personnes.name as user_name', 'personnes.email as user_email', 'personnes.reputation_score', 'memberships.*')
+        ->where('memberships.colocation_id', $colocations->first()->id ?? null)
         ->where('memberships.is_active', true)
         ->get();
 
@@ -42,9 +43,9 @@ class ColocationController extends Controller
             'name' => ['required']
         ]);
 
-        $coloc = Colocation::count();
+        $member = Membership::where('utilisateur_id', auth()->id())->where('is_active', true)->exists();
 
-        if($coloc < 1){
+        if(!$member){
             Colocation::create([
                 'name' => $input['name'],
                 'status_colocation' => true,
@@ -67,9 +68,12 @@ class ColocationController extends Controller
             Utilisateur::where('personne_id', auth()->id())->update([
                 'is_owner' => true,
             ]);
-        }
+            return redirect()->route('user.dashboard')->with('message', 'Colocation créée avec succès.');
 
-        return redirect()->route('user.dashboard')->with('message', 'Colocation créée avec succès.');
+        }else{
+            return redirect()->route('user.dashboard')->with('error', 'Vous êtes déjà membre d\'une colocation active.');
+        }
+        
     }
 
     public function join(Request $request){
