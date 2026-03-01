@@ -170,6 +170,16 @@
     
     <!-- MAIN -->
     <main class="ml-64 flex-1 p-8 animate-fade-in">
+        <!-- flash messages -->
+       @if(session('message'))
+            <div class="flash-message mb-4 p-3 bg-blue-100 text-blue-800 rounded">{{ session('message') }}</div>
+        @endif
+        @if(session('success'))
+            <div class="flash-message mb-4 p-3 bg-green-100 text-green-800 rounded">{{ session('success') }}</div>
+        @endif
+        @if(session('error'))
+            <div class="flash-message mb-4 p-3 bg-red-100 text-red-800 rounded">{{ session('error') }}</div>
+        @endif
         
         <!-- Header -->
         <div class="flex items-start justify-between mb-8">
@@ -188,6 +198,17 @@
             @endif
 
             <!-- Create -->
+            
+        <script>
+            // hide flash messages after 5 seconds
+            setTimeout(() => {
+                document.querySelectorAll('.flash-message').forEach(el => {
+                    el.style.transition = 'opacity 0.5s';
+                    el.style.opacity = '0';
+                    setTimeout(() => el.remove(), 500);
+                });
+            }, 5000);
+        </script>
             <button onclick="document.getElementById('createModal').style.display='flex'"
                 class="px-4 py-2.5 rounded-xl border-2 border-slate-300 text-slate-700 font-semibold text-sm hover:border-sky-400 transition">
                 + Créer une coloc
@@ -279,6 +300,18 @@
                             @if($member->utilisateur_id == Auth::id())
                                 <span class="badge bg-green-100 text-green-700">Vous</span>
                             @endif
+                            @if($member->role == 'member' && $roleMembership)
+                                <form action="{{ route('membership.remove', $member->id) }}" method="post">
+                                    @csrf
+                                    @method('DELETE')
+                                    <button
+                                    class="btn-red"
+                                    onclick="document.getElementById('removeModal').style.display='flex'">
+                                    Retirer
+                                    </button>
+                                </form>
+                        
+                            @endif
                         </div>
                 
                         @endforeach
@@ -290,17 +323,20 @@
                 <div class="mt-6 p-4 rounded-xl border-2 border-dashed border-red-200 bg-red-50">
                     <p class="text-slate-600 text-sm mb-3 font-medium">⚠️ Zone danger</p>
                     <div class="flex gap-3 flex-wrap">
-                        <button
+                        @if($countColocation > 0)
+                            <button
                             class="px-4 py-2 rounded-xl bg-white border border-red-300 text-red-600 text-sm font-semibold hover:bg-red-50 transition"
                             onclick="document.getElementById('leaveModal').style.display='flex'">
                             🚪 Quitter la colocation
-                        </button>
+                            </button>
+                        @endif
                         @if($roleMembership)
-                            <button
+                            
+                                <button
                                 class="px-4 py-2 rounded-xl bg-white border border-red-300 text-red-600 text-sm font-semibold hover:bg-red-50 transition"
                                 onclick="document.getElementById('cancelModal').style.display='flex'">
                                 ❌ Annuler la colocation
-                            </button>
+                                </button>
                         @endif
 
                     </div>
@@ -384,26 +420,7 @@
         </div>
     </div>
 
-    <!-- Remove Member Modal -->
-    <div id="removeModal" class="modal-overlay" style="display:none"
-        onclick="if(event.target===this)this.style.display='none'">
-        <div class="modal">
-            <h3 class="text-xl font-bold text-slate-800 mb-2">⚠️ Retirer un membre</h3>
-            <div class="bg-amber-50 border border-amber-200 rounded-xl p-4 mb-5">
-                <p class="text-amber-800 text-sm font-medium">Si ce membre a des dettes non réglées, la dette sera
-                    imputée à vous (l'owner) — ajustement interne du système.</p>
-            </div>
-            <p class="text-slate-600 text-sm mb-6">Êtes-vous sûr de vouloir retirer <strong>Thomas Martin</strong> de la
-                colocation ?</p>
-            <div class="flex gap-3 justify-end">
-                <button class="px-4 py-2.5 rounded-xl border border-slate-200 text-slate-600 font-medium text-sm"
-                    onclick="document.getElementById('removeModal').style.display='none'">Annuler</button>
-                <button
-                    class="px-4 py-2.5 rounded-xl bg-red-500 text-white font-semibold text-sm hover:bg-red-600 transition">Confirmer
-                    le retrait</button> 
-            </div>
-        </div>
-    </div>
+   
 
     <!-- Leave Modal -->
     <div id="leaveModal" class="modal-overlay" style="display:none"
@@ -441,9 +458,12 @@
             <div class="flex gap-3 justify-end">
                 <button class="px-4 py-2.5 rounded-xl border border-slate-200 text-slate-600 font-medium text-sm"
                     onclick="document.getElementById('cancelModal').style.display='none'">Annuler</button>
-                <button
+                <form action="{{ route('colocation.cancel') }}" method="post">
+                    @csrf
+                    <button type="submit"
                     class="px-4 py-2.5 rounded-xl bg-red-600 text-white font-semibold text-sm hover:bg-red-700 transition">Annuler
                     définitivement</button>
+                </form>
             </div>
         </div>
     </div>
